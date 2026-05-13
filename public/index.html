@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KeywordIQ — AI-Powered SEO Research</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080c10;
+    --surface: #0e1520;
+    --surface2: #131d2e;
+    --border: #1e2d42;
+    --accent: #00d4ff;
+    --accent2: #00ff9d;
+    --accent3: #ff6b35;
+    --text: #e8f4ff;
+    --text-dim: #6b8299;
+    --text-mid: #a0bcd4;
+    --danger: #ff4466;
+    --gold: #ffd700;
+    --mono: 'Space Mono', monospace;
+    --sans: 'Syne', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; position: relative; z-index: 1; }
+
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 18px 0;
+    background: rgba(8,12,16,0.95);
+    backdrop-filter: blur(20px);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .header-inner { display: flex; align-items: center; justify-content: space-between; }
+  .logo { font-family: var(--sans); font-weight: 800; font-size: 22px; letter-spacing: -0.5px; display: flex; align-items: center; gap: 10px; }
+  .logo-icon { width: 32px; height: 32px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+  .logo span { color: var(--accent); }
+  .header-badge { font-family: var(--mono); font-size: 11px; color: var(--accent2); border: 1px solid var(--accent2); padding: 3px 10px; border-radius: 20px; letter-spacing: 1px; }
+
+  .hero { padding: 50px 0 30px; }
+  .hero-title { font-size: clamp(28px, 4vw, 46px); font-weight: 800; line-height: 1.1; margin-bottom: 10px; letter-spacing: -1px; }
+  .hero-title .hl { color: var(--accent); }
+  .hero-title .hl2 { color: var(--accent2); }
+  .hero-sub { color: var(--text-dim); font-size: 15px; margin-bottom: 28px; font-family: var(--mono); }
+
+  .search-bar { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+  .search-input {
+    flex: 1; min-width: 250px;
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--text); padding: 14px 20px; font-size: 16px;
+    font-family: var(--sans); border-radius: 10px; outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,212,255,0.1); }
+  .search-input::placeholder { color: var(--text-dim); }
+
+  .country-select {
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--text); padding: 14px 16px; font-size: 14px;
+    font-family: var(--mono); border-radius: 10px; outline: none; cursor: pointer;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), #0099cc);
+    color: #000; border: none; padding: 14px 28px;
+    font-size: 15px; font-weight: 700; font-family: var(--sans);
+    border-radius: 10px; cursor: pointer;
+    transition: transform 0.15s, opacity 0.15s, box-shadow 0.15s;
+    white-space: nowrap;
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 25px rgba(0,212,255,0.3); }
+  .btn-primary:active { transform: translateY(0); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .niche-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 28px; }
+  .niche-pill {
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--text-mid); padding: 7px 14px; font-size: 12px;
+    font-family: var(--mono); border-radius: 20px; cursor: pointer;
+    transition: all 0.2s; letter-spacing: 0.3px;
+  }
+  .niche-pill:hover { border-color: var(--accent); color: var(--accent); }
+  .niche-pill.active { background: rgba(0,212,255,0.1); border-color: var(--accent); color: var(--accent); }
+
+  .tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--border); margin-bottom: 28px; overflow-x: auto; }
+  .tab-btn {
+    background: none; border: none; color: var(--text-dim);
+    padding: 12px 20px; font-size: 13px; font-family: var(--mono);
+    cursor: pointer; border-bottom: 2px solid transparent;
+    transition: all 0.2s; white-space: nowrap; letter-spacing: 0.5px;
+  }
+  .tab-btn:hover { color: var(--text-mid); }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .results-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .results-count { font-family: var(--mono); font-size: 12px; color: var(--text-dim); }
+  .results-count span { color: var(--accent2); font-weight: 700; }
+
+  .kw-table-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead { background: var(--surface2); }
+  th {
+    padding: 13px 16px; text-align: left; font-family: var(--mono);
+    font-size: 11px; color: var(--text-dim); letter-spacing: 1px;
+    text-transform: uppercase; border-bottom: 1px solid var(--border); white-space: nowrap;
+  }
+  td { padding: 13px 16px; border-bottom: 1px solid rgba(30,45,66,0.6); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(0,212,255,0.03); }
+
+  .kw-word { font-weight: 600; color: var(--text); font-size: 14px; }
+  .kw-intent { font-family: var(--mono); font-size: 10px; padding: 3px 8px; border-radius: 4px; margin-left: 8px; }
+  .intent-c { background: rgba(0,255,157,0.1); color: var(--accent2); }
+  .intent-i { background: rgba(0,212,255,0.1); color: var(--accent); }
+  .intent-t { background: rgba(255,107,53,0.1); color: var(--accent3); }
+
+  .vol-bar { display: flex; align-items: center; gap: 8px; }
+  .vol-bar-track { flex: 1; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; min-width: 60px; }
+  .vol-bar-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--accent2), var(--accent)); }
+
+  .diff-badge { font-family: var(--mono); font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 5px; }
+  .diff-low { background: rgba(0,255,157,0.12); color: var(--accent2); }
+  .diff-med { background: rgba(255,215,0,0.12); color: var(--gold); }
+  .diff-high { background: rgba(255,68,102,0.12); color: var(--danger); }
+
+  .cpm-val { font-family: var(--mono); font-weight: 700; color: var(--accent2); }
+
+  .btn-write {
+    background: none; border: 1px solid var(--accent3);
+    color: var(--accent3); padding: 6px 12px; font-size: 11px;
+    font-family: var(--mono); border-radius: 6px; cursor: pointer;
+    transition: all 0.2s; white-space: nowrap;
+  }
+  .btn-write:hover { background: rgba(255,107,53,0.1); }
+
+  .questions-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; }
+  .question-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 16px; transition: border-color 0.2s; cursor: pointer;
+  }
+  .question-card:hover { border-color: var(--accent); }
+  .q-text { font-size: 14px; font-weight: 600; margin-bottom: 10px; line-height: 1.4; }
+  .q-meta { display: flex; gap: 6px; flex-wrap: wrap; }
+  .q-tag { font-family: var(--mono); font-size: 10px; background: var(--surface2); border: 1px solid var(--border); padding: 2px 8px; border-radius: 4px; color: var(--text-dim); }
+
+  .trending-list { display: flex; flex-direction: column; gap: 8px; }
+  .trend-item {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 16px; display: flex; align-items: center; gap: 16px;
+    cursor: pointer; transition: border-color 0.2s;
+  }
+  .trend-item:hover { border-color: var(--accent2); }
+  .trend-rank { font-family: var(--mono); font-size: 20px; font-weight: 700; color: var(--border); min-width: 36px; }
+  .trend-rank.top3 { color: var(--gold); }
+  .trend-info { flex: 1; }
+  .trend-kw { font-weight: 700; font-size: 15px; margin-bottom: 4px; }
+  .trend-desc { font-size: 12px; color: var(--text-dim); font-family: var(--mono); }
+  .trend-spike { font-family: var(--mono); font-size: 12px; color: var(--accent2); font-weight: 700; white-space: nowrap; }
+  .trend-spike .arrow { color: var(--accent2); margin-right: 2px; }
+
+  .stats-bar {
+    display: none; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 28px;
+  }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+  .stat-label { font-family: var(--mono); font-size: 10px; color: var(--text-dim); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
+  .stat-val { font-size: 22px; font-weight: 800; color: var(--accent); }
+
+  .loading-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 20px; gap: 16px; }
+  .spinner { width: 36px; height: 36px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { font-family: var(--mono); font-size: 13px; color: var(--text-dim); }
+
+  .empty-state { text-align: center; padding: 60px 20px; }
+  .empty-icon { font-size: 40px; margin-bottom: 12px; }
+  .empty-state h3 { font-size: 16px; margin-bottom: 8px; color: var(--text-mid); }
+  .empty-state p { font-size: 13px; color: var(--text-dim); font-family: var(--mono); }
+
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(8px); z-index: 200;
+    display: none; align-items: flex-start; justify-content: center; padding: 20px;
+    overflow-y: auto;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px; width: 100%; max-width: 820px;
+    margin: auto; overflow: hidden;
+  }
+  .modal-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 24px; border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; background: var(--surface); z-index: 1;
+  }
+  .modal-title { font-weight: 700; font-size: 15px; }
+  .modal-kw-badge { font-family: var(--mono); font-size: 12px; color: var(--accent); background: rgba(0,212,255,0.1); border: 1px solid rgba(0,212,255,0.3); padding: 4px 12px; border-radius: 20px; }
+  .modal-actions { display: flex; gap: 8px; align-items: center; }
+  .btn-icon { background: none; border: 1px solid var(--border); color: var(--text-mid); padding: 8px 14px; font-size: 12px; font-family: var(--mono); border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+  .btn-icon:hover { border-color: var(--accent); color: var(--accent); }
+  .modal-body { padding: 28px 32px; }
+  .article-content h1 { font-size: 26px; font-weight: 800; margin-bottom: 20px; line-height: 1.2; }
+  .article-content h2 { font-size: 20px; font-weight: 700; margin: 28px 0 12px; color: var(--accent); }
+  .article-content h3 { font-size: 16px; font-weight: 700; margin: 20px 0 8px; color: var(--accent2); }
+  .article-content p { font-size: 15px; line-height: 1.75; color: var(--text-mid); margin-bottom: 14px; }
+  .article-content ul { padding-left: 20px; margin-bottom: 14px; }
+  .article-content li { font-size: 15px; line-height: 1.7; color: var(--text-mid); margin-bottom: 6px; }
+  .article-content strong { color: var(--text); }
+
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text); padding: 12px 24px; border-radius: 30px;
+    font-family: var(--mono); font-size: 13px; z-index: 999;
+    transition: transform 0.3s ease; pointer-events: none;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  @media (max-width: 768px) {
+    .stats-bar { grid-template-columns: repeat(2, 1fr); }
+    .modal-body { padding: 20px; }
+    .article-content h1 { font-size: 20px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="container">
+    <div class="header-inner">
+      <div class="logo"><div class="logo-icon">⚡</div>Keyword<span>IQ</span></div>
+      <div class="header-badge">POWERED BY CLAUDE AI</div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="hero">
+    <div class="hero-title">AI Keyword Research<br>for <span class="hl">High-CPM</span> <span class="hl2">Niches</span></div>
+    <div class="hero-sub">// Find profitable keywords + generate SEO articles instantly</div>
+    <div class="search-bar">
+      <input class="search-input" id="mainInput" placeholder="Enter topic, niche, or keyword..." />
+      <select class="country-select" id="countrySelect">
+        <option value="US">🇺🇸 USA</option>
+        <option value="UK">🇬🇧 UK</option>
+        <option value="CA">🇨🇦 Canada</option>
+        <option value="AU">🇦🇺 Australia</option>
+        <option value="ALL">🌐 All</option>
+      </select>
+      <button class="btn-primary" onclick="runResearch()">Research →</button>
+    </div>
+    <div class="niche-row">
+      <div class="niche-pill" onclick="setNiche(this,'finance')">💰 Finance</div>
+      <div class="niche-pill" onclick="setNiche(this,'health insurance')">🏥 Health</div>
+      <div class="niche-pill" onclick="setNiche(this,'legal advice')">⚖️ Legal</div>
+      <div class="niche-pill" onclick="setNiche(this,'real estate')">🏠 Real Estate</div>
+      <div class="niche-pill" onclick="setNiche(this,'crypto investing')">₿ Crypto</div>
+      <div class="niche-pill" onclick="setNiche(this,'software saas')">💻 SaaS</div>
+      <div class="niche-pill" onclick="setNiche(this,'insurance')">🛡️ Insurance</div>
+      <div class="niche-pill" onclick="setNiche(this,'online education')">🎓 Education</div>
+    </div>
+  </div>
+
+  <div class="stats-bar" id="statsBar">
+    <div class="stat-card"><div class="stat-label">Keywords Found</div><div class="stat-val" id="s-count">—</div></div>
+    <div class="stat-card"><div class="stat-label">Avg CPM Rate</div><div class="stat-val" id="s-cpm">—</div></div>
+    <div class="stat-card"><div class="stat-label">Best Opportunity</div><div class="stat-val" style="font-size:14px;padding-top:4px" id="s-opp">—</div></div>
+    <div class="stat-card"><div class="stat-label">Market</div><div class="stat-val" style="font-size:16px;padding-top:4px" id="s-market">—</div></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab(this,'keywords')">🔍 Keywords</button>
+    <button class="tab-btn" onclick="switchTab(this,'questions')">❓ Questions</button>
+    <button class="tab-btn" onclick="switchTab(this,'trending')">🔥 Trending</button>
+  </div>
+
+  <div id="tab-keywords"><div id="keywordsOutput"><div class="empty-state"><div class="empty-icon">🔍</div><h3>Ready to research</h3><p>Enter a topic above and click Research</p></div></div></div>
+  <div id="tab-questions" style="display:none"><div id="questionsOutput"><div class="empty-state"><div class="empty-icon">❓</div><h3>Questions will appear here</h3><p>Run a research query first</p></div></div></div>
+  <div id="tab-trending" style="display:none"><div id="trendingOutput"><div class="empty-state"><div class="empty-icon">🔥</div><h3>Trending topics will appear here</h3><p>Run a research query first</p></div></div></div>
+</div>
+
+<div class="modal-overlay" id="articleModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="modal-title">✍️ AI Article</div>
+        <div class="modal-kw-badge" id="articleKwBadge"></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-icon" onclick="copyArticle()">📋 Copy</button>
+        <button class="btn-icon" onclick="closeModal()">✕ Close</button>
+      </div>
+    </div>
+    <div class="modal-body" id="articleBody"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  let currentArticleText = "";
+
+  function setNiche(el, val) {
+    document.querySelectorAll('.niche-pill').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('mainInput').value = val;
+  }
+
+  function switchTab(el, tab) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+    ['keywords','questions','trending'].forEach(t => {
+      document.getElementById('tab-'+t).style.display = t === tab ? '' : 'none';
+    });
+  }
+
+  async function callClaude(prompt, maxTokens = 1000) {
+    const res = await fetch('/api/claude', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-opus-4-5',
+        max_tokens: maxTokens,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error?.message || 'API error ' + res.status);
+    }
+    const data = await res.json();
+    return data.content?.[0]?.text || '';
+  }
+
+  async function runResearch() {
+    const topic = document.getElementById('mainInput').value.trim();
+    const country = document.getElementById('countrySelect').value;
+    if (!topic) { alert('Please enter a topic!'); return; }
+
+    const btn = document.querySelector('.btn-primary');
+    btn.disabled = true; btn.textContent = 'Researching...';
+    setLoading('keywordsOutput'); setLoading('questionsOutput'); setLoading('trendingOutput');
+    document.getElementById('statsBar').style.display = 'none';
+
+    const kwPrompt = `You are an SEO keyword research expert. Generate keyword data for "${topic}" targeting the ${country} market.
+
+Return ONLY a valid JSON array (no markdown, no explanation) with exactly 12 keyword objects:
+[{"keyword":"...","monthlyVolume":50000,"difficulty":35,"cpm":4.50,"intent":"C","trend":"up"},...]
+
+Rules:
+- intent: "C" (commercial), "I" (informational), or "T" (transactional)
+- trend: "up", "down", or "stable"
+- difficulty: 1-100
+- cpm: realistic USD CPM for ${country} display advertising
+- monthlyVolume: realistic monthly searches
+Return only the JSON array.`;
+
+    const qPrompt = `Generate 9 question-based keywords for "${topic}". Return ONLY a valid JSON array:
+[{"question":"How do I...?","volume":8000,"type":"how-to"},...]
+Types: how-to, what-is, why, comparison, best. Return only the JSON array.`;
+
+    const tPrompt = `Generate 8 trending topics related to "${topic}" right now. Return ONLY a valid JSON array:
+[{"keyword":"...","description":"brief reason trending","spike":"+340%"},...]
+Return only the JSON array.`;
+
+    try {
+      const [kwRaw, qRaw, tRaw] = await Promise.all([
+        callClaude(kwPrompt, 1200),
+        callClaude(qPrompt, 800),
+        callClaude(tPrompt, 800)
+      ]);
+
+      const keywords = JSON.parse(kwRaw.replace(/```json|```/g,'').trim());
+      const questions = JSON.parse(qRaw.replace(/```json|```/g,'').trim());
+      const trending = JSON.parse(tRaw.replace(/```json|```/g,'').trim());
+
+      renderKeywords(keywords, country);
+      renderQuestions(questions, topic);
+      renderTrending(trending);
+      renderStats(keywords, country);
+    } catch (err) {
+      const msg = err.message.includes("ANTHROPIC_API_KEY")
+        ? "API key not set. Add ANTHROPIC_API_KEY to your Vercel environment variables."
+        : "Failed to fetch data: " + err.message;
+      showError("keywordsOutput", msg);
+      showError("questionsOutput", msg);
+      showError("trendingOutput", msg);
+      console.error(err);
+    }
+
+    btn.disabled = false;
+    btn.textContent = "Research →";
+  }
+
+  function renderKeywords(keywords, country) {
+    if (!keywords.length) { showError("keywordsOutput", "No keywords returned."); return; }
+    const rows = keywords.map(k => {
+      const diff = k.difficulty;
+      const dc = diff < 35 ? "diff-low" : diff < 65 ? "diff-med" : "diff-high";
+      const dl = diff < 35 ? "LOW" : diff < 65 ? "MED" : "HIGH";
+      const volPct = Math.min(100, (k.monthlyVolume / 100000) * 100);
+      const volFmt = k.monthlyVolume >= 1000 ? (k.monthlyVolume/1000).toFixed(1)+"K" : k.monthlyVolume;
+      const ic = k.intent === "C" ? "intent-c" : k.intent === "T" ? "intent-t" : "intent-i";
+      const il = k.intent === "C" ? "Commercial" : k.intent === "T" ? "Transactional" : "Info";
+      const trendIcon = k.trend === "up" ? "📈" : k.trend === "down" ? "📉" : "➡️";
+      return `<tr>
+        <td><span class="kw-word">${esc(k.keyword)}</span><span class="kw-intent ${ic}">${il}</span></td>
+        <td><div class="vol-bar"><span style="font-family:var(--mono);font-size:12px;white-space:nowrap">${volFmt}</span><div class="vol-bar-track"><div class="vol-bar-fill" style="width:${volPct}%"></div></div></div></td>
+        <td><span class="diff-badge ${dc}">${dl} ${diff}</span></td>
+        <td><span class="cpm-val">$${parseFloat(k.cpm).toFixed(2)}</span></td>
+        <td>${trendIcon}</td>
+        <td><button class="btn-write" onclick="writeArticle(${JSON.stringify(k.keyword)}, '${country}')">✍️ Write Article</button></td>
+      </tr>`;
+    }).join("");
+    document.getElementById("keywordsOutput").innerHTML = `
+      <div class="results-header"><div class="results-count">Found <span>${keywords.length}</span> keywords</div></div>
+      <div class="kw-table-wrap"><table>
+        <thead><tr><th>Keyword</th><th>Monthly Volume</th><th>Difficulty</th><th>CPM Rate</th><th>Trend</th><th>Action</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div>`;
+  }
+
+  function renderQuestions(questions, baseKw) {
+    if (!questions.length) { showError("questionsOutput", "No questions returned."); return; }
+    const cards = questions.map(q => {
+      const vol = q.volume >= 1000 ? (q.volume/1000).toFixed(1)+"K" : q.volume;
+      return `<div class="question-card" onclick="writeArticle(${JSON.stringify(q.question)}, '')">
+        <div class="q-text">${esc(q.question)}</div>
+        <div class="q-meta">
+          <span class="q-tag">${q.type || "question"}</span>
+          <span class="q-tag">~${vol}/mo</span>
+          <span class="q-tag" style="color:var(--accent3)">✍️ Write Article</span>
+        </div>
+      </div>`;
+    }).join("");
+    document.getElementById("questionsOutput").innerHTML = `
+      <div class="results-header"><div class="results-count">Found <span>${questions.length}</span> questions about "${esc(baseKw)}"</div></div>
+      <div class="questions-grid">${cards}</div>`;
+  }
+
+  function renderTrending(trending) {
+    if (!trending.length) { showError("trendingOutput", "No trending data returned."); return; }
+    const items = trending.map((t, i) => `
+      <div class="trend-item" onclick="writeArticle(${JSON.stringify(t.keyword)}, '')">
+        <div class="trend-rank ${i < 3 ? 'top3' : ''}">${String(i+1).padStart(2,"0")}</div>
+        <div class="trend-info">
+          <div class="trend-kw">${esc(t.keyword)}</div>
+          <div class="trend-desc">${esc(t.description)}</div>
+        </div>
+        <div class="trend-spike"><span class="arrow">↑</span>${t.spike}</div>
+      </div>`).join("");
+    document.getElementById("trendingOutput").innerHTML = `
+      <div class="results-header"><div class="results-count">Top <span>${trending.length}</span> trending topics</div></div>
+      <div class="trending-list">${items}</div>`;
+  }
+
+  function renderStats(keywords, country) {
+    if (!keywords.length) return;
+    document.getElementById("statsBar").style.display = "grid";
+    const avgCpm = (keywords.reduce((a,k) => a + k.cpm, 0) / keywords.length).toFixed(2);
+    const best = keywords.filter(k => k.difficulty < 50).sort((a,b) => b.cpm - a.cpm)[0];
+    const cm = { US:"🇺🇸 USA", UK:"🇬🇧 UK", CA:"🇨🇦 Canada", AU:"🇦🇺 Australia", ALL:"🌐 All" };
+    document.getElementById("s-count").textContent = keywords.length;
+    document.getElementById("s-cpm").textContent = "$" + avgCpm;
+    document.getElementById("s-opp").textContent = best ? best.keyword.slice(0,22) + (best.keyword.length > 22 ? "…" : "") : "—";
+    document.getElementById("s-market").textContent = cm[country] || country;
+  }
+
+  async function writeArticle(keyword, country) {
+    document.getElementById("articleKwBadge").textContent = keyword;
+    document.getElementById("articleModal").classList.add("open");
+    document.getElementById("articleBody").innerHTML = `
+      <div class="loading-wrap"><div class="spinner"></div><div class="loading-text">Claude is writing your SEO article...</div></div>`;
+
+    const prompt = `Write a comprehensive SEO-optimized article of at least 1500 words for the keyword: "${keyword}"
+
+Target audience: English-speaking readers in US, UK, Canada, Australia (high-CPM advertising markets).
+
+Format requirements:
+- Start with a compelling H1 title containing the keyword
+- Engaging 150-word introduction that hooks the reader
+- 5-6 H2 subheadings with detailed content (250+ words each)
+- H3 subheadings where appropriate
+- Practical tips, real examples, and actionable advice
+- Naturally woven in keywords for SEO
+- Strong conclusion with a call to action
+- Use Markdown formatting (# ## ### **bold** - bullets)
+- Total: 1500-2000 words
+- Make it genuinely helpful and authoritative`;
+
+    try {
+      const articleMd = await callClaude(prompt, 3500);
+      currentArticleText = articleMd;
+      document.getElementById("articleBody").innerHTML = `<div class="article-content">${mdToHtml(articleMd)}</div>`;
+    } catch (err) {
+      document.getElementById("articleBody").innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><p>${esc(err.message)}</p></div>`;
+    }
+  }
+
+  function mdToHtml(md) {
+    return md
+      .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+      .replace(/^### (.+)$/gm,"<h3>$1</h3>")
+      .replace(/^## (.+)$/gm,"<h2>$1</h2>")
+      .replace(/^# (.+)$/gm,"<h1>$1</h1>")
+      .replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>")
+      .replace(/\*(.+?)\*/g,"<em>$1</em>")
+      .replace(/^[-*] (.+)$/gm,"<li>$1</li>")
+      .replace(/^\d+\. (.+)$/gm,"<li>$1</li>")
+      .replace(/(<li>[\s\S]*?<\/li>\n?)+/g, m => `<ul>${m}</ul>`)
+      .replace(/^(?!<[hul]|<li)(.+)$/gm, (m) => m.trim() ? `<p>${m}</p>` : "");
+  }
+
+  function esc(s) {
+    return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  }
+  function setLoading(id) {
+    document.getElementById(id).innerHTML = `<div class="loading-wrap"><div class="spinner"></div><div class="loading-text">Analyzing with Claude AI...</div></div>`;
+  }
+  function showError(id, msg) {
+    document.getElementById(id).innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><h3>Error</h3><p style="color:var(--danger);font-family:var(--mono);font-size:13px">${esc(msg)}</p></div>`;
+  }
+  function closeModal() { document.getElementById("articleModal").classList.remove("open"); }
+  async function copyArticle() {
+    if (!currentArticleText) return;
+    try { await navigator.clipboard.writeText(currentArticleText); showToast("✅ Article copied!"); }
+    catch { showToast("❌ Copy failed — select text manually"); }
+  }
+  function showToast(msg) {
+    const t = document.getElementById("toast");
+    t.textContent = msg; t.classList.add("show");
+    setTimeout(() => t.classList.remove("show"), 3000);
+  }
+  document.getElementById("mainInput").addEventListener("keydown", e => { if (e.key === "Enter") runResearch(); });
+  document.getElementById("articleModal").addEventListener("click", e => { if (e.target === document.getElementById("articleModal")) closeModal(); });
+</script>
+</body>
+</html>
