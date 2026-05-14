@@ -182,17 +182,12 @@ tr:hover td{background:rgba(0,229,255,0.02)}
 <div class="toast" id="toast"></div>
 <script>
 const MODEL='claude-sonnet-4-20250514';
-const API_KEY='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';
 let artText='';
 
 async function claude(prompt,maxTokens){
-  const res=await fetch('https://corsproxy.io/?https://api.anthropic.com/v1/messages',{
+  const res=await fetch('/api/claude',{
     method:'POST',
-    headers:{
-      'Content-Type':'application/json',
-      'x-api-key':API_KEY,
-      'anthropic-version':'2023-06-01'
-    },
+    headers:{'Content-Type':'application/json'},
     body:JSON.stringify({model:MODEL,max_tokens:maxTokens,messages:[{role:'user',content:prompt}]})
   });
   if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e?.error?.message||'API error '+res.status);}
@@ -281,9 +276,7 @@ async function writeArt(kw,country){
   document.getElementById('artModal').classList.add('open');
   document.getElementById('artBody').innerHTML='<div class="loading"><div class="spin"></div><div class="spin-text">Writing your SEO article...<br>Please wait 20-30 seconds</div></div>';
   const cname={US:'United States',UK:'United Kingdom',CA:'Canada',AU:'Australia',ALL:'US, UK, Canada and Australia'}[country]||'English-speaking countries';
-  const prompt=`Write a comprehensive SEO-optimized blog article of at least 1500 words about: "${kw}"
-Target audience: English-speaking readers in ${cname}.
-Structure: # H1 title, strong intro, ## 5-6 H2 sections (200+ words each), ### H3 subsections, bullet points, real tips and strategies, income figures, ## Conclusion with CTA. Total: 1500-2000 words. Format: Clean Markdown.`;
+  const prompt=`Write a comprehensive SEO-optimized blog article of at least 1500 words about: "${kw}" Target audience: English-speaking readers in ${cname}. Structure: # H1 title, strong intro, ## 5-6 H2 sections, bullet points, real tips, ## Conclusion with CTA. Format: Clean Markdown.`;
   try{
     const md=await claude(prompt,4000);
     artText=md;
