@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KeywordIQ — AI SEO Research Tool</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#06080f;--s1:#0c1018;--s2:#111826;--border:#1c2a3e;--cyan:#00e5ff;--green:#00ff88;--orange:#ff7043;--text:#ddeeff;--dim:#4a6a85;--mid:#8aafc8;--red:#ff3355;--gold:#ffcc00;--mono:'JetBrains Mono',monospace;--head:'Syne',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--head);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(0,229,255,0.06),transparent);pointer-events:none;z-index:0}
+body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,229,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,0.025) 1px,transparent 1px);background-size:44px 44px;pointer-events:none;z-index:0}
+header{background:rgba(6,8,15,0.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:14px 0;position:sticky;top:0;z-index:200}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px;position:relative;z-index:1}
+.hdr{display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:10px;font-size:20px;font-weight:800;letter-spacing:-0.5px}
+.logo-box{width:34px;height:34px;background:linear-gradient(135deg,var(--cyan),var(--green));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.logo em{color:var(--cyan);font-style:normal}
+.badge{font-family:var(--mono);font-size:10px;color:var(--green);border:1px solid var(--green);padding:4px 12px;border-radius:20px;letter-spacing:1.5px}
+.hero{padding:36px 0 20px}
+.hero h1{font-size:clamp(24px,4vw,46px);font-weight:800;line-height:1.1;letter-spacing:-1px;margin-bottom:8px}
+.hero h1 .c1{color:var(--cyan)}.hero h1 .c2{color:var(--green)}
+.hero p{font-family:var(--mono);font-size:12px;color:var(--dim);margin-bottom:22px}
+.search-row{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.s-input{flex:1;min-width:220px;background:var(--s1);border:1px solid var(--border);color:var(--text);padding:13px 18px;font-size:15px;font-family:var(--head);border-radius:10px;outline:none;transition:.2s}
+.s-input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,229,255,0.08)}
+.s-input::placeholder{color:var(--dim)}
+.s-select{background:var(--s1);border:1px solid var(--border);color:var(--text);padding:13px 14px;font-size:13px;font-family:var(--mono);border-radius:10px;outline:none;cursor:pointer}
+.btn-go{background:linear-gradient(135deg,var(--cyan),#0099bb);color:#000;border:none;padding:13px 26px;font-size:14px;font-weight:700;font-family:var(--head);border-radius:10px;cursor:pointer;transition:.15s;white-space:nowrap}
+.btn-go:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,229,255,0.25)}
+.btn-go:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.niches{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px}
+.niche{background:var(--s1);border:1px solid var(--border);color:var(--mid);padding:6px 14px;font-size:11px;font-family:var(--mono);border-radius:20px;cursor:pointer;transition:.2s;letter-spacing:.3px}
+.niche:hover{border-color:var(--cyan);color:var(--cyan)}
+.niche.on{background:rgba(0,229,255,0.08);border-color:var(--cyan);color:var(--cyan)}
+.tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:22px;gap:0;overflow-x:auto}
+.tab{background:none;border:none;border-bottom:2px solid transparent;color:var(--dim);padding:11px 20px;font-size:12px;font-family:var(--mono);cursor:pointer;transition:.2s;white-space:nowrap;letter-spacing:.5px}
+.tab:hover{color:var(--mid)}.tab.on{color:var(--cyan);border-bottom-color:var(--cyan)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:22px}
+.stat{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:14px}
+.stat-l{font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px}
+.stat-v{font-size:20px;font-weight:700;color:var(--cyan);font-family:var(--mono)}
+.stat-s{font-family:var(--mono);font-size:9px;color:var(--dim);margin-top:2px}
+.tbl-wrap{border-radius:12px;border:1px solid var(--border);overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead{background:var(--s2)}
+th{padding:12px 14px;text-align:left;font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:12px 14px;border-bottom:1px solid rgba(28,42,62,0.5);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(0,229,255,0.02)}
+.kw{font-weight:600;font-size:14px}
+.tag{font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:3px;margin-left:6px;vertical-align:middle}
+.tc{background:rgba(0,255,136,0.1);color:var(--green)}.ti{background:rgba(0,229,255,0.1);color:var(--cyan)}.tt{background:rgba(255,112,67,0.1);color:var(--orange)}
+.vbar{display:flex;align-items:center;gap:8px}
+.vtrack{flex:1;height:3px;background:var(--border);border-radius:2px;overflow:hidden;min-width:50px}
+.vfill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--green),var(--cyan))}
+.vnum{font-family:var(--mono);font-size:11px;white-space:nowrap}
+.diff{font-family:var(--mono);font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px}
+.dl{background:rgba(0,255,136,0.1);color:var(--green)}.dm{background:rgba(255,204,0,0.1);color:var(--gold)}.dh{background:rgba(255,51,85,0.1);color:var(--red)}
+.cpm{font-family:var(--mono);font-weight:700;color:var(--green)}
+.btn-art{background:none;border:1px solid var(--orange);color:var(--orange);padding:5px 11px;font-size:10px;font-family:var(--mono);border-radius:5px;cursor:pointer;transition:.2s;white-space:nowrap}
+.btn-art:hover{background:rgba(255,112,67,0.1)}
+.q-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
+.q-card{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:14px;cursor:pointer;transition:.2s}
+.q-card:hover{border-color:var(--cyan)}
+.q-text{font-size:13px;margin-bottom:8px;line-height:1.5}
+.q-meta{display:flex;gap:8px;flex-wrap:wrap}
+.q-tag{font-family:var(--mono);font-size:9px;color:var(--dim);background:var(--s2);padding:2px 7px;border-radius:3px}
+.q-write{color:var(--orange)!important}
+.t-list{display:flex;flex-direction:column;gap:8px}
+.t-item{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:14px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:.2s}
+.t-item:hover{border-color:var(--green)}
+.t-num{font-family:var(--mono);font-size:18px;font-weight:700;color:var(--border);min-width:28px;text-align:center}
+.t-num.gold{color:var(--gold)}
+.t-info{flex:1}.t-kw{font-size:15px;font-weight:600;margin-bottom:3px}
+.t-desc{font-size:11px;color:var(--dim);font-family:var(--mono)}
+.t-spike{font-family:var(--mono);font-size:11px;color:var(--green);text-align:right}
+.t-arr{font-size:14px;display:block}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:500;backdrop-filter:blur(8px);align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto}
+.overlay.open{display:flex}
+.modal{background:var(--s1);border:1px solid var(--border);border-radius:16px;width:100%;max-width:820px;margin:auto;overflow:hidden}
+.modal-hdr{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--border);background:var(--s2)}
+.modal-title{font-size:15px;font-weight:700;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.modal-kw{font-family:var(--mono);font-size:10px;background:rgba(0,229,255,0.08);color:var(--cyan);padding:3px 9px;border-radius:4px;border:1px solid rgba(0,229,255,0.2);max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.modal-x{background:none;border:1px solid var(--border);color:var(--dim);width:30px;height:30px;border-radius:7px;cursor:pointer;font-size:17px;display:flex;align-items:center;justify-content:center;transition:.2s;flex-shrink:0}
+.modal-x:hover{border-color:var(--red);color:var(--red)}
+.modal-body{padding:22px;max-height:72vh;overflow-y:auto}
+.modal-body::-webkit-scrollbar{width:5px}
+.modal-body::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+.modal-ftr{padding:14px 22px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;background:var(--s2);flex-wrap:wrap}
+.btn-copy{background:var(--s1);border:1px solid var(--border);color:var(--mid);padding:9px 18px;font-size:12px;font-family:var(--mono);border-radius:7px;cursor:pointer;transition:.2s}
+.btn-copy:hover{border-color:var(--green);color:var(--green)}
+.art{line-height:1.8;font-size:14px;color:var(--mid)}
+.art h1{font-size:24px;font-weight:700;color:var(--cyan);margin:0 0 14px;line-height:1.2}
+.art h2{font-size:18px;font-weight:700;color:var(--text);border-left:3px solid var(--cyan);padding-left:12px;margin:22px 0 10px}
+.art h3{font-size:14px;font-weight:600;color:var(--green);margin:14px 0 6px}
+.art p{margin-bottom:12px}.art ul,.art ol{padding-left:20px;margin-bottom:12px}
+.art li{margin-bottom:5px}.art strong{color:var(--text)}
+.loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:56px 20px;gap:14px}
+.spin{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--cyan);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spin-text{font-family:var(--mono);font-size:12px;color:var(--dim);text-align:center}
+.empty{text-align:center;padding:56px 20px;color:var(--dim)}
+.empty-icon{font-size:44px;margin-bottom:14px;opacity:.35}
+.empty h3{font-size:17px;margin-bottom:6px;color:var(--mid)}
+.empty p{font-size:12px;font-family:var(--mono)}
+.toast{position:fixed;bottom:20px;right:20px;background:var(--s2);border:1px solid var(--green);color:var(--green);padding:11px 18px;border-radius:9px;font-family:var(--mono);font-size:12px;z-index:9999;transform:translateY(70px);transition:transform .3s;pointer-events:none}
+.toast.show{transform:translateY(0)}
+.panel{display:none}.panel.on{display:block}
+.rh{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.rc{font-family:var(--mono);font-size:11px;color:var(--dim)}.rc span{color:var(--green);font-weight:700}
+.err-box{background:rgba(255,51,85,0.05);border:1px solid rgba(255,51,85,0.2);border-radius:10px;padding:20px;text-align:center}
+.err-box h3{color:var(--red);font-size:15px;margin-bottom:8px}
+.err-box p{font-family:var(--mono);font-size:11px;color:var(--dim);line-height:1.6}
+@media(max-width:600px){.stats{grid-template-columns:1fr 1fr}th,td{padding:9px 10px}.hero h1{font-size:22px}.btn-go{padding:13px 16px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="hdr">
+      <div class="logo"><div class="logo-box">⚡</div>Keyword<em>IQ</em></div>
+      <div class="badge">CLAUDE AI</div>
+    </div>
+  </div>
+</header>
+<div class="wrap">
+  <section class="hero">
+    <h1>Find <span class="c1">High-CPM</span> Keywords<br>for <span class="c2">English Markets</span></h1>
+    <p>// US · UK · Canada · Australia — Powered by Claude AI</p>
+    <div class="search-row">
+      <input class="s-input" id="kwInput" placeholder="Type any keyword e.g. make money online, crypto, side hustles..."/>
+      <select class="s-select" id="ctry">
+        <option value="US">🇺🇸 USA</option>
+        <option value="UK">🇬🇧 UK</option>
+        <option value="CA">🇨🇦 Canada</option>
+        <option value="AU">🇦🇺 Australia</option>
+        <option value="ALL">🌐 All Markets</option>
+      </select>
+      <button class="btn-go" id="goBtn" onclick="doResearch()">Research →</button>
+    </div>
+    <div class="niches">
+      <span class="niche" onclick="pickNiche(this,'Make Money Online')">💰 Make Money Online</span>
+      <span class="niche" onclick="pickNiche(this,'Side Hustles')">⚡ Side Hustles</span>
+      <span class="niche" onclick="pickNiche(this,'Passive Income')">📈 Passive Income</span>
+      <span class="niche" onclick="pickNiche(this,'Freelancing')">💼 Freelancing</span>
+      <span class="niche" onclick="pickNiche(this,'Crypto Investing')">₿ Crypto</span>
+      <span class="niche" onclick="pickNiche(this,'Affiliate Marketing')">🔗 Affiliate Marketing</span>
+      <span class="niche" onclick="pickNiche(this,'Stock Market Investing')">📊 Investing</span>
+    </div>
+    <div class="tabs">
+      <button class="tab on" onclick="switchTab('kw',this)">📊 Keywords</button>
+      <button class="tab" onclick="switchTab('qs',this)">❓ Questions</button>
+      <button class="tab" onclick="switchTab('tr',this)">🔥 Trending</button>
+    </div>
+  </section>
+  <div class="stats" id="statsBar" style="display:none">
+    <div class="stat"><div class="stat-l">Keywords</div><div class="stat-v" id="sCount">0</div><div class="stat-s">found</div></div>
+    <div class="stat"><div class="stat-l">Avg CPM</div><div class="stat-v" id="sCpm">$0</div><div class="stat-s">USD estimate</div></div>
+    <div class="stat"><div class="stat-l">Best Pick</div><div class="stat-v" id="sBest" style="font-size:13px;padding-top:3px">—</div><div class="stat-s">low diff + high CPM</div></div>
+    <div class="stat"><div class="stat-l">Market</div><div class="stat-v" id="sMkt" style="font-size:15px;padding-top:3px">—</div><div class="stat-s">target region</div></div>
+  </div>
+  <div class="panel on" id="panel-kw"><div id="kwOut"><div class="empty"><div class="empty-icon">🔍</div><h3>Ready to research</h3><p>Type any keyword above or click a niche button</p></div></div></div>
+  <div class="panel" id="panel-qs"><div id="qsOut"><div class="empty"><div class="empty-icon">❓</div><h3>Questions appear here</h3><p>Run a search first</p></div></div></div>
+  <div class="panel" id="panel-tr"><div id="trOut"><div class="empty"><div class="empty-icon">🔥</div><h3>Trending topics appear here</h3><p>Run a search first</p></div></div></div>
+  <div style="height:40px"></div>
+</div>
+<div class="overlay" id="artModal">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-title">✍️ AI Article Writer <span class="modal-kw" id="artKw">—</span></div>
+      <button class="modal-x" onclick="closeArt()">×</button>
+    </div>
+    <div class="modal-body"><div id="artBody"></div></div>
+    <div class="modal-ftr">
+      <button class="btn-copy" onclick="copyArt()">📋 Copy Article</button>
+      <button class="btn-go" onclick="closeArt()">Done</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+const ENDPOINT='/api/claude';
+const MODEL='claude-sonnet-4-20250514';
+let artText='';
+
+async function claude(prompt,maxTokens){
+  const res=await fetch(ENDPOINT,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({model:MODEL,max_tokens:maxTokens,messages:[{role:'user',content:prompt}]})
+  });
+  if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e?.error?.message||e?.error||'API error '+res.status);}
+  const data=await res.json();
+  return data.content[0].text;
+}
+
+function pickNiche(el,kw){
+  document.getElementById('kwInput').value=kw;
+  document.querySelectorAll('.niche').forEach(n=>n.classList.remove('on'));
+  el.classList.add('on');doResearch();
+}
+function switchTab(id,btn){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('on'));
+  document.getElementById('panel-'+id).classList.add('on');btn.classList.add('on');
+}
+
+async function doResearch(){
+  const kw=document.getElementById('kwInput').value.trim();
+  if(!kw){toast('Please enter a keyword!');return;}
+  const country=document.getElementById('ctry').value;
+  const cname={US:'United States',UK:'United Kingdom',CA:'Canada',AU:'Australia',ALL:'US, UK, Canada and Australia'}[country];
+  const btn=document.getElementById('goBtn');
+  btn.disabled=true;btn.textContent='Researching...';
+  loading('kwOut');loading('qsOut');loading('trOut');
+  document.getElementById('statsBar').style.display='none';
+  const prompt=`You are an expert SEO keyword researcher. Topic: "${kw}" for ${cname}.
+Respond with ONLY a raw JSON object. No markdown. No backticks. No explanation. Pure JSON only:
+{"keywords":[{"keyword":"string","vol":12000,"diff":35,"cpm":8.50,"intent":"C","trend":"up"}],"questions":[{"q":"string","vol":5000,"type":"how-to"}],"trending":[{"kw":"string","spike":"+250%","why":"short reason"}]}
+Rules:
+- keywords: exactly 15 items. vol=monthly searches 500-300000. diff=1-100. cpm=USD 2-25. intent=C or I or T. trend=up or flat or down
+- Finance/crypto/investing CPM: $8-$25. Side hustles/MMO: $5-$15. General: $2-$8
+- questions: exactly 12 people-also-ask style questions
+- trending: exactly 10 hot topics with spike percentages
+- All data realistic for ${cname}
+- Return ONLY the JSON, nothing else`;
+  try{
+    const raw=await claude(prompt,2500);
+    const clean=raw.replace(/```json|```/gi,'').trim();
+    const d=JSON.parse(clean);
+    renderKw(d.keywords||[],country);
+    renderQs(d.questions||[],kw);
+    renderTr(d.trending||[]);
+    renderStats(d.keywords||[],country);
+  }catch(e){showErr('kwOut',e.message);showErr('qsOut',e.message);showErr('trOut',e.message);}
+  btn.disabled=false;btn.textContent='Research →';
+}
+
+function renderKw(kws,country){
+  if(!kws.length){showErr('kwOut','No keywords returned');return;}
+  const rows=kws.map(k=>{
+    const d=k.diff,dc=d<35?'dl':d<65?'dm':'dh',dl=d<35?'LOW':d<65?'MED':'HIGH';
+    const pct=Math.min(100,(k.vol/150000)*100);
+    const vf=k.vol>=1000?(k.vol/1000).toFixed(1)+'K':k.vol;
+    const ic=k.intent==='C'?'tc':k.intent==='T'?'tt':'ti';
+    const il=k.intent==='C'?'Commercial':k.intent==='T'?'Transactional':'Info';
+    const ti=k.trend==='up'?'📈':k.trend==='down'?'📉':'➡️';
+    return`<tr><td><span class="kw">${x(k.keyword)}</span><span class="tag ${ic}">${il}</span></td><td><div class="vbar"><span class="vnum">${vf}</span><div class="vtrack"><div class="vfill" style="width:${pct}%"></div></div></div></td><td><span class="diff ${dc}">${dl} ${d}</span></td><td><span class="cpm">$${parseFloat(k.cpm).toFixed(2)}</span></td><td>${ti}</td><td><button class="btn-art" onclick="writeArt(${JSON.stringify(k.keyword)},'${country}')">✍️ Write Article</button></td></tr>`;
+  }).join('');
+  document.getElementById('kwOut').innerHTML=`<div class="rh"><div class="rc">Found <span>${kws.length}</span> keywords</div></div><div class="tbl-wrap"><table><thead><tr><th>Keyword</th><th>Monthly Volume</th><th>Difficulty</th><th>CPM Rate</th><th>Trend</th><th>Action</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+
+function renderQs(qs,base){
+  if(!qs.length){showErr('qsOut','No questions returned');return;}
+  const cards=qs.map(q=>{
+    const v=q.vol>=1000?(q.vol/1000).toFixed(1)+'K':q.vol;
+    return`<div class="q-card" onclick="writeArt(${JSON.stringify(q.q)},'')"><div class="q-text">${x(q.q)}</div><div class="q-meta"><span class="q-tag">${q.type||'question'}</span><span class="q-tag">~${v}/mo</span><span class="q-tag q-write">✍️ Click to write article</span></div></div>`;
+  }).join('');
+  document.getElementById('qsOut').innerHTML=`<div class="rh"><div class="rc"><span>${qs.length}</span> questions about "${x(base)}"</div></div><div class="q-grid">${cards}</div>`;
+}
+
+function renderTr(tr){
+  if(!tr.length){showErr('trOut','No trending data');return;}
+  const items=tr.map((t,i)=>`<div class="t-item" onclick="writeArt(${JSON.stringify(t.kw)},'')"><div class="t-num ${i<3?'gold':''}">${String(i+1).padStart(2,'0')}</div><div class="t-info"><div class="t-kw">${x(t.kw)}</div><div class="t-desc">${x(t.why)}</div></div><div class="t-spike"><span class="t-arr">↑</span>${t.spike}</div></div>`).join('');
+  document.getElementById('trOut').innerHTML=`<div class="rh"><div class="rc">Top <span>${tr.length}</span> trending topics</div></div><div class="t-list">${items}</div>`;
+}
+
+function renderStats(kws,country){
+  if(!kws.length)return;
+  document.getElementById('statsBar').style.display='grid';
+  const avg=(kws.reduce((a,k)=>a+k.cpm,0)/kws.length).toFixed(2);
+  const best=kws.filter(k=>k.diff<50).sort((a,b)=>b.cpm-a.cpm)[0];
+  const cm={US:'🇺🇸 USA',UK:'🇬🇧 UK',CA:'🇨🇦 Canada',AU:'🇦🇺 Australia',ALL:'🌐 All'};
+  document.getElementById('sCount').textContent=kws.length;
+  document.getElementById('sCpm').textContent='$'+avg;
+  document.getElementById('sBest').textContent=best?best.keyword.slice(0,18)+(best.keyword.length>18?'…':''):'—';
+  document.getElementById('sMkt').textContent=cm[country]||country;
+}
+
+async function writeArt(kw,country){
+  document.getElementById('artKw').textContent=kw;
+  document.getElementById('artModal').classList.add('open');
+  document.getElementById('artBody').innerHTML='<div class="loading"><div class="spin"></div><div class="spin-text">Writing your SEO article with Claude AI...<br>This takes 20-30 seconds</div></div>';
+  const cname={US:'United States',UK:'United Kingdom',CA:'Canada',AU:'Australia',ALL:'US, UK, Canada and Australia'}[country]||'English-speaking countries (US, UK, Canada, Australia)';
+  const prompt=`Write a comprehensive SEO-optimized blog article of at least 1500 words about: "${kw}"
+Target audience: English-speaking readers in ${cname}. People interested in making money, financial freedom, and building income streams.
+Structure:
+- # H1 title with keyword (compelling and clickable)
+- Strong 150-word intro that hooks the reader
+- ## 5-6 H2 sections with detailed content (at least 200 words each)
+- ### H3 subsections where helpful
+- Bullet points and numbered lists
+- Real tips, examples, actionable strategies
+- ## Conclusion with strong call to action
+- Total: 1500-2000 words. Format: Clean Markdown. Tone: Authoritative, helpful, engaging`;
+  try{
+    const md=await claude(prompt,4000);
+    artText=md;
+    document.getElementById('artBody').innerHTML='<div class="art">'+mdHtml(md)+'</div>';
+  }catch(e){
+    document.getElementById('artBody').innerHTML=`<div class="err-box"><h3>⚠️ Error</h3><p>${x(e.message)}</p></div>`;
+  }
+}
+
+function mdHtml(md){
+  return md.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/^### (.+)$/gm,'<h3>$1</h3>').replace(/^## (.+)$/gm,'<h2>$1</h2>').replace(/^# (.+)$/gm,'<h1>$1</h1>')
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\*(.+?)\*/g,'<em>$1</em>')
+    .replace(/^[-*] (.+)$/gm,'<li>$1</li>').replace(/^\d+\. (.+)$/gm,'<li>$1</li>')
+    .replace(/(<li>[\s\S]*?<\/li>\n?)+/g,m=>'<ul>'+m+'</ul>')
+    .replace(/^(?!<[hul])(.+)$/gm,m=>m.trim()?'<p>'+m+'</p>':'');
+}
+function x(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function loading(id){document.getElementById(id).innerHTML='<div class="loading"><div class="spin"></div><div class="spin-text">Claude AI is analyzing...<br>Please wait 10-15 seconds</div></div>';}
+function showErr(id,msg){document.getElementById(id).innerHTML=`<div class="err-box"><h3>⚠️ Something went wrong</h3><p>${x(msg)}</p></div>`;}
+function closeArt(){document.getElementById('artModal').classList.remove('open');}
+async function copyArt(){
+  if(!artText)return;
+  try{await navigator.clipboard.writeText(artText);toast('✅ Article copied!');}
+  catch{toast('❌ Select text manually to copy');}
+}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3200);}
+document.getElementById('kwInput').addEventListener('keydown',e=>{if(e.key==='Enter')doResearch();});
+document.getElementById('artModal').addEventListener('click',e=>{if(e.target===document.getElementById('artModal'))closeArt();});
+</script>
+</body>
+</html>
